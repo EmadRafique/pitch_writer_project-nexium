@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+body {
+  color: #e2e8f0; /* slate-200 */
+  background-color: #020617; /* slate-950 */
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Starfield Background Container */
+.starry-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  overflow: hidden;
+}
+
+/* Keyframes for star animation */
+@keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+
+/* The actual stars */
+.stars, .twinkling {
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.stars {
+  background:#000 url(https://www.script-tutorials.com/demos/360/images/stars.png) repeat top center;
+  z-index: 0;
+}
+
+.twinkling{
+  background:transparent url(https://www.script-tutorials.com/demos/360/images/twinkling.png) repeat top center;
+  z-index: 1;
+  animation:move-twink-back 200s linear infinite;
+}
+
+/* Card Style for the new UI */
+.glass-card-deep {
+  background-color: rgba(15, 23, 42, 0.6); /* slate-900 with opacity */
+  border-radius: 1rem;
+  border: 1px solid rgba(51, 65, 85, 0.5); /* slate-700 */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* For loading animation */
+@keyframes pulse {
+  50% { opacity: .6; }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
