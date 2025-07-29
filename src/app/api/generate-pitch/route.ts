@@ -135,7 +135,7 @@ async function callN8nWebhook(problem: string, solution: string, targetAudience?
       // If it's JSON but we can't find the content, return the whole thing as string
       return JSON.stringify(jsonResponse, null, 2);
     }
-  } catch (jsonError) {
+  } catch {
     // If it's not JSON, return as plain text
     console.log('n8n returned plain text');
     return responseText;
@@ -178,9 +178,7 @@ export async function POST(req: NextRequest) {
     const { title, problem, solution, targetAudience } = await req.json();
 
     let generatedPitch: string;
-    let usedFallback = false;
-    let usedDirectGemini = false;
-    let n8nError: Error | null = null;
+
 
     // Try n8n first if configured
     if (N8N_WEBHOOK_URL) {
@@ -189,7 +187,6 @@ export async function POST(req: NextRequest) {
         generatedPitch = await callN8nWebhook(problem, solution, targetAudience);
         console.log('✅ n8n workflow successful');
       } catch (error) {
-        n8nError = error instanceof Error ? error : new Error(String(error));
         console.error('❌ n8n workflow error:', error);
         
         // Try direct Gemini API if available
@@ -197,19 +194,19 @@ export async function POST(req: NextRequest) {
           try {
             console.log('Trying direct Gemini API...');
             generatedPitch = await generatePitchWithGemini(problem, solution, targetAudience);
-            usedDirectGemini = true;
+
             console.log('✅ Direct Gemini API successful');
           } catch (geminiError) {
             console.error('❌ Direct Gemini API error:', geminiError);
             // Fall back to basic template
             generatedPitch = generateFallbackPitch(problem, solution, targetAudience);
-            usedFallback = true;
+
             console.log('✅ Using fallback pitch generation');
           }
         } else {
           // Use fallback pitch generation when n8n fails
           generatedPitch = generateFallbackPitch(problem, solution, targetAudience);
-          usedFallback = true;
+
           console.log('✅ Using fallback pitch generation (no Gemini API key)');
         }
       }
@@ -218,12 +215,12 @@ export async function POST(req: NextRequest) {
       try {
         console.log('No n8n configured, trying direct Gemini API...');
         generatedPitch = await generatePitchWithGemini(problem, solution, targetAudience);
-        usedDirectGemini = true;
+
         console.log('✅ Direct Gemini API successful');
       } catch (geminiError) {
         console.error('❌ Direct Gemini API error:', geminiError);
         generatedPitch = generateFallbackPitch(problem, solution, targetAudience);
-        usedFallback = true;
+
         console.log('✅ Using fallback pitch generation');
       }
     }

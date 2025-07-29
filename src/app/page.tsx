@@ -26,8 +26,8 @@ export default function LoginPage() {
         throw error;
       }
       setSubmitted(true)
-    } catch (err: any) {
-      setError(err.message || 'Failed to send magic link. Please try again.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send magic link. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -42,17 +42,17 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md">
         {submitted ? (
           <div className="glass-card-deep p-10 text-center">
-            <h2 className="text-2xl font-bold mb-4 text-green-400">Magic Link Sent!</h2>
+            <h2 className="text-2xl font-bold mb-4 text-green-400">✨ Magic Link Sent! ✨</h2>
             <p className="text-gray-300">A sign-in link has been sent to <br/><span className="font-semibold text-white">{email}</span>.</p>
           </div>
         ) : (
           <form onSubmit={handleLogin} className="glass-card-deep p-10 space-y-6">
             <div className="text-center">
                 <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-green-300">
-                Pitch Writer AI
+                🎯 Pitch Writer AI 🎯
                 </h1>
                 <p className="mt-2 text-gray-400">
-                The future of compelling pitches is here.
+                ✨ The future of compelling pitches is here. ✨
                 </p>
             </div>
             
@@ -80,7 +80,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3 px-6 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Sending...' : 'Send Magic Link'}
+              {loading ? '📤 Sending...' : '📤 Send Magic Link'}
             </button>
           </form>
         )}

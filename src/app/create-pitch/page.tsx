@@ -29,6 +29,7 @@ export default function CreatePitchPage() {
   const [error, setError] = useState('');
   const [session, setSession] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false); // State for copy button feedback
+  const [isSaved, setIsSaved] = useState(false); // State for save button feedback
   const router = useRouter();
 
   useEffect(() => {
@@ -54,6 +55,13 @@ export default function CreatePitchPage() {
     setIsCopied(true);
     // Reset the "Copied!" message after 2 seconds
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  // Function to handle saving the pitch
+  const handleSave = () => {
+    setIsSaved(true);
+    // Reset the "Saved!" message after 2 seconds
+    setTimeout(() => setIsSaved(false), 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,8 +94,8 @@ export default function CreatePitchPage() {
       const data = await response.json();
       setGeneratedPitch(data.pitch);
       
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
@@ -107,7 +115,7 @@ export default function CreatePitchPage() {
         <div className="p-6 sm:p-8 max-w-4xl mx-auto bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
           <div className="pitch-result-container">
             <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500">
-              Your AI-Generated Pitch
+              ✨ Your AI-Generated Pitch ✨
             </h1>
             <div className="whitespace-pre-wrap text-gray-300 leading-relaxed bg-gray-900/50 p-6 rounded-lg border border-gray-600">{generatedPitch}</div>
             <div className="mt-8 flex flex-wrap gap-4">
@@ -118,7 +126,7 @@ export default function CreatePitchPage() {
                 }}
                 className="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105"
               >
-                Create Another Pitch
+                🚀 Create Another Pitch
               </button>
               {/* --- NEW COPY BUTTON --- */}
               <button
@@ -130,13 +138,25 @@ export default function CreatePitchPage() {
                 }`}
               >
                 {isCopied ? <CheckIcon /> : <CopyIcon />}
-                {isCopied ? 'Copied!' : 'Copy Pitch'}
+                {isCopied ? '✅ Copied!' : '📋 Copy Pitch'}
+              </button>
+              
+              {/* --- NEW SAVE BUTTON --- */}
+              <button
+                onClick={handleSave}
+                className={`flex items-center justify-center font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 ${
+                  isSaved
+                    ? 'bg-green-600 text-white'
+                    : 'bg-yellow-500 text-white hover:bg-yellow-600'
+                }`}
+              >
+                {isSaved ? '💾 Saved!' : '💾 Save Pitch'}
               </button>
               <button
                 onClick={() => router.push('/dashboard')}
                 className="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-gray-700 transition-all duration-200 transform hover:scale-105"
               >
-                Go to Dashboard
+                📊 Go to Dashboard
               </button>
             </div>
           </div>
@@ -149,12 +169,12 @@ export default function CreatePitchPage() {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-8 font-sans">
       <div className="p-6 sm:p-8 max-w-2xl mx-auto bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
         <h1 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-          Create a New Pitch
+          🎯 Create a New Pitch 🎯
         </h1>
         {error && <p className="text-red-400 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">Pitch Title</label>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">📝 Pitch Title</label>
             <input
               type="text"
               id="title"
@@ -167,7 +187,7 @@ export default function CreatePitchPage() {
             />
           </div>
           <div>
-            <label htmlFor="problem" className="block text-sm font-medium text-gray-300 mb-2">Problem Statement</label>
+            <label htmlFor="problem" className="block text-sm font-medium text-gray-300 mb-2">❓ Problem Statement</label>
             <textarea
               id="problem"
               name="problem"
@@ -180,7 +200,7 @@ export default function CreatePitchPage() {
             ></textarea>
           </div>
           <div>
-            <label htmlFor="solution" className="block text-sm font-medium text-gray-300 mb-2">Solution / Your Idea</label>
+            <label htmlFor="solution" className="block text-sm font-medium text-gray-300 mb-2">💡 Solution / Your Idea</label>
             <textarea
               id="solution"
               name="solution"
@@ -193,7 +213,7 @@ export default function CreatePitchPage() {
             ></textarea>
           </div>
           <div>
-            <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-300 mb-2">Target Audience (Optional)</label>
+            <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-300 mb-2">🎯 Target Audience (Optional)</label>
             <input
               type="text"
               id="targetAudience"
@@ -209,7 +229,7 @@ export default function CreatePitchPage() {
               type="submit"
               className="w-full sm:w-auto inline-flex items-center justify-center py-3 px-6 border border-transparent shadow-lg text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900 transition-all duration-200 transform hover:scale-105"
             >
-              Generate Pitch
+              🚀 Generate Pitch
             </button>
           </div>
         </form>

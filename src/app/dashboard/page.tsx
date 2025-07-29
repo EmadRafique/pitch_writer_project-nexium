@@ -38,7 +38,7 @@ export default function DashboardPage() {
           return;
         }
         setUser(user);
-        await loadUserPitches(user.id);
+        await loadUserPitches();
       } catch (err) {
         console.error('Session error:', err);
         router.push('/login');
@@ -58,7 +58,7 @@ export default function DashboardPage() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const loadUserPitches = async (userId: string) => {
+  const loadUserPitches = async () => {
     setLoadingPitches(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -70,8 +70,8 @@ export default function DashboardPage() {
         const data = await response.json();
         setPitches(data.pitches || []);
       }
-    } catch (error) {
-      console.error('Error loading pitches:', error);
+    } catch {
+      console.error('Error loading pitches');
     } finally {
       setLoadingPitches(false);
     }
@@ -87,7 +87,7 @@ export default function DashboardPage() {
 
       const response = await fetch(`/api/pitches/${pitchId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (!response.ok) setPitches(originalPitches);
-    } catch (error) {
+    } catch {
       setPitches(originalPitches);
     }
   };
@@ -107,35 +107,35 @@ export default function DashboardPage() {
       <div className="relative z-10">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-10 glass-card-deep p-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-green-300 mb-4 sm:mb-0">
-            Welcome, <span className="text-gray-200 font-medium">{user?.email}</span>!
+            👋 Welcome, <span className="text-gray-200 font-medium">{user?.email}</span>!
             </h1>
             <button onClick={async () => await supabase.auth.signOut()} className="flex items-center text-sm font-semibold text-red-400 hover:text-red-300 transition-colors">
             <LogoutIcon />
-            Logout
+            🚪 Logout
             </button>
         </header>
 
         <div className="glass-card-deep p-8 mb-10 text-center">
-            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 mb-4">Pitch Writer Dashboard</h2>
+            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 mb-4">🎯 Pitch Writer Dashboard 🎯</h2>
             <p className="text-gray-300 leading-relaxed text-lg mb-8 max-w-2xl mx-auto">
-            This is your creative space. Generate, manage, and perfect your AI-powered pitches.
+            ✨ This is your creative space. Generate, manage, and perfect your AI-powered pitches. ✨
             </p>
             <button onClick={() => router.push('/create-pitch')} className="inline-flex items-center py-3 px-8 rounded-full font-bold text-white bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
             <PlusIcon />
-            Create New Pitch
+            🚀 Create New Pitch
             </button>
         </div>
 
         <div className="glass-card-deep p-8">
             <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-6">
-            Your Saved Pitches ({pitches.length})
+            📚 Your Saved Pitches ({pitches.length})
             </h3>
             
-            {loadingPitches ? <p className="text-gray-400 animate-pulse">Loading your pitches...</p> : 
+            {loadingPitches ? <p className="text-gray-400 animate-pulse">⏳ Loading your pitches...</p> : 
             pitches.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed border-gray-700 rounded-lg">
-                <p className="text-gray-300 text-lg">Your canvas is empty.</p>
-                <p className="text-gray-500 mt-2">Click "Create New Pitch" to bring your first idea to life!</p>
+                <p className="text-gray-300 text-lg">🎨 Your canvas is empty.</p>
+                <p className="text-gray-500 mt-2">Click &quot;Create New Pitch&quot; to bring your first idea to life! ✨</p>
             </div>
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
