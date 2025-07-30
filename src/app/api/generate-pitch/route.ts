@@ -86,73 +86,94 @@ async function callN8nWebhook(problem: string, solution: string, targetAudience?
   console.log('Calling n8n webhook:', N8N_WEBHOOK_URL);
   console.log('Payload:', { problem, solution, targetAudience });
 
-  const response = await fetch(N8N_WEBHOOK_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      problem,
-      solution,
-      targetAudience,
-    }),
-  });
+  // Retry logic for n8n
+  const maxRetries = 3;
+  let lastError: Error | null = null;
 
-  console.log('n8n response status:', response.status);
-  console.log('n8n response headers:', Object.fromEntries(response.headers.entries()));
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`n8n attempt ${attempt}/${maxRetries}...`);
+      
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          problem,
+          solution,
+          targetAudience,
+        }),
+      });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('n8n error response:', errorText);
-    throw new Error(`n8n workflow failed with status: ${response.status}. Error: ${errorText}`);
-  }
+      console.log('n8n response status:', response.status);
+      console.log('n8n response headers:', Object.fromEntries(response.headers.entries()));
 
-  const responseText = await response.text();
-  console.log('n8n response text length:', responseText.length);
-  console.log('n8n response preview:', responseText.substring(0, 200));
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('n8n error response:', errorText);
+        throw new Error(`n8n workflow failed with status: ${response.status}. Error: ${errorText}`);
+      }
 
-  // Check for empty or invalid responses
-  if (!responseText || responseText.trim() === "") {
-    throw new Error("Empty response from n8n workflow - check your n8n workflow configuration");
-  }
+      const responseText = await response.text();
+      console.log('n8n response text length:', responseText.length);
+      console.log('n8n response preview:', responseText.substring(0, 200));
 
-  // Check if response is just whitespace or very short
-  if (responseText.trim().length < 10) {
-    throw new Error("Invalid response from n8n workflow - response too short");
-  }
+      // Check for empty or invalid responses
+      if (!responseText || responseText.trim() === "") {
+        throw new Error("Empty response from n8n workflow - check your n8n workflow configuration");
+      }
 
-  // Check if response contains template variables (this is the issue!)
-  if (responseText.includes('{{ $json.content }}') || responseText.includes('{{ $json.text }}')) {
-    console.error('❌ n8n is returning template variables instead of real content!');
-    console.error('This means your n8n workflow is not properly configured.');
-    throw new Error("n8n workflow is returning template variables instead of real AI content. Please check your n8n workflow configuration.");
-  }
+      // Check if response is just whitespace or very short
+      if (responseText.trim().length < 10) {
+        throw new Error("Invalid response from n8n workflow - response too short");
+      }
 
-  // Try to parse as JSON first (in case n8n returns JSON)
-  try {
-    const jsonResponse = JSON.parse(responseText);
-    console.log('n8n returned JSON:', jsonResponse);
-    
-    // Extract pitch content from various possible JSON structures
-    if (jsonResponse.pitch) {
-      return jsonResponse.pitch;
-    } else if (jsonResponse.content) {
-      return jsonResponse.content;
-    } else if (jsonResponse.text) {
-      return jsonResponse.text;
-    } else if (jsonResponse.message) {
-      return jsonResponse.message;
-    } else if (typeof jsonResponse === 'string') {
-      return jsonResponse;
-    } else {
-      // If it's JSON but we can't find the content, return the whole thing as string
-      return JSON.stringify(jsonResponse, null, 2);
+      // Check if response contains template variables (this is the issue!)
+      if (responseText.includes('{{ $json.content }}') || responseText.includes('{{ $json.text }}')) {
+        console.error('❌ n8n is returning template variables instead of real content!');
+        console.error('This means your n8n workflow is not properly configured.');
+        throw new Error("n8n workflow is returning template variables instead of real AI content. Please check your n8n workflow configuration.");
+      }
+
+      // Try to parse as JSON first (in case n8n returns JSON)
+      try {
+        const jsonResponse = JSON.parse(responseText);
+        console.log('n8n returned JSON:', jsonResponse);
+        
+        // Extract pitch content from various possible JSON structures
+        if (jsonResponse.pitch) {
+          return jsonResponse.pitch;
+        } else if (jsonResponse.content) {
+          return jsonResponse.content;
+        } else if (jsonResponse.text) {
+          return jsonResponse.text;
+        } else if (jsonResponse.message) {
+          return jsonResponse.message;
+        } else if (typeof jsonResponse === 'string') {
+          return jsonResponse;
+        } else {
+          // If it's JSON but we can't find the content, return the whole thing as string
+          return JSON.stringify(jsonResponse, null, 2);
+        }
+      } catch {
+        // If it's not JSON, return as plain text
+        console.log('n8n returned plain text');
+        return responseText;
+      }
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`n8n attempt ${attempt} failed:`, error);
+      
+      if (attempt < maxRetries) {
+        console.log(`Waiting 2 seconds before retry...`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
-  } catch {
-    // If it's not JSON, return as plain text
-    console.log('n8n returned plain text');
-    return responseText;
   }
+
+  // If all retries failed, throw the last error
+  throw lastError || new Error('n8n workflow failed after all retry attempts');
 }
 
 export async function POST(req: NextRequest) {
