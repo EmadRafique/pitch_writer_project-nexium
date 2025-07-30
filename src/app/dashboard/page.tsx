@@ -34,14 +34,14 @@ export default function DashboardPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          router.push('/login');
+          router.push('/');
           return;
         }
         setUser(user);
         await loadUserPitches();
       } catch (err) {
         console.error('Session error:', err);
-        router.push('/login');
+        router.push('/');
       } finally {
         setLoading(false);
       }
@@ -51,7 +51,7 @@ export default function DashboardPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setUser(session?.user ?? null);
         if (!session?.user) {
-            router.push('/login');
+            router.push('/');
         }
     });
 

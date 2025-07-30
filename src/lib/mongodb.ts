@@ -5,9 +5,13 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 // Throw an error if the URI is not defined
 if (!MONGODB_URI) {
-  throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
-  );
+  console.warn('MONGODB_URI environment variable is not defined');
+  // Don't throw error during build time
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Please define the MONGODB_URI environment variable in Vercel'
+    );
+  }
 }
 
 /**

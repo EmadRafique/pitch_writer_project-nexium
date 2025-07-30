@@ -14,17 +14,23 @@ function generateFallbackPitch(problem: string, solution: string, targetAudience
   
   return `Here's a compelling pitch${audience}:
 
-**The Problem:**
+The Problem:
 ${problem}
 
-**Our Solution:**
+Our Solution:
 ${solution}
 
-**Why This Matters:**
+Why This Matters:
 This solution directly addresses the core issue you're facing, providing a clear path forward that delivers measurable results.
 
-**Next Steps:**
-Let's discuss how we can implement this solution and start seeing results immediately.`;
+Next Steps:
+Let's discuss how we can implement this solution and start seeing results immediately.
+
+Contact Information:
+Email: your-email@company.com
+Phone: +1 (555) 123-4567
+Website: www.yourcompany.com
+Address: 123 Business Street, City, State 12345`;
 
 }
 
@@ -52,6 +58,13 @@ Please create a pitch that:
 3. Explains why this solution matters
 4. Includes a call to action
 5. Is professional and persuasive
+
+IMPORTANT REQUIREMENTS:
+- Do NOT use markdown formatting (no **, ##, etc.)
+- Do NOT use placeholder text like [Your Name] or [Company Name]
+- Include a complete signature section with actual contact information
+- Use plain text formatting with clear sections
+- Make it ready to use immediately without any editing
 
 Format the response with clear sections and bullet points where appropriate.`;
 
